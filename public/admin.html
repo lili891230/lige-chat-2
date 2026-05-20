@@ -120,7 +120,7 @@ var pwdInput=document.getElementById('pwdInput'),loginBtn=document.getElementByI
 function showToast(msg,type){toastEl.textContent=msg;toastEl.className='t '+type+' show';setTimeout(function(){toastEl.classList.remove('show');},3000);}
 function escHtml(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 
-loginBtn.addEventListener('click',function(){var v=pwdInput.value.trim();if(!v){showToast('请输入密码','err');return;}adminPassword=v;loginCard.style.display='none';adminPanel.style.display='block';showToast('登录成功','ok');loadStatus();loadAnnouncement();loadTitle();});
+loginBtn.addEventListener('click',function(){var v=pwdInput.value.trim();if(!v){showToast('请输入密码','err');return;}loginBtn.disabled=true;loginBtn.textContent='验证中...';fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:v})}).then(function(r){return r.json();}).then(function(d){if(d.success){adminPassword=v;loginCard.style.display='none';adminPanel.style.display='block';showToast('登录成功','ok');loadStatus();loadAnnouncement();loadTitle();}else{showToast(d.error||'密码错误','err');}}).catch(function(){showToast('请求失败','err');}).finally(function(){loginBtn.disabled=false;loginBtn.textContent='登录';});});
 pwdInput.addEventListener('keydown',function(e){if(e.key==='Enter')loginBtn.click();});
 
 function loadStatus(){fetch('/api/status').then(function(r){return r.json();}).then(function(d){sOnline.textContent=d.onlineCount+' 人';sCount.textContent=d.messageCount+' 条';sMuted.innerHTML=d.muted?'<span class="sd off"></span>已禁言':'<span class="sd on"></span>正常';sTitle.textContent=d.title||'-';muteBtn.disabled=d.muted;unmuteBtn.disabled=!d.muted;}).catch(function(){showToast('加载失败','err');});}

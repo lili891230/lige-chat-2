@@ -37,6 +37,7 @@ export class ChatRoom {
     if (path === "/api/mute") return await this.handleMute(request);
     if (path === "/api/announcement") return await this.handleAnnouncement(request);
     if (path === "/api/change-password") return await this.handleChangePassword(request);
+    if (path === "/api/login") return await this.handleLogin(request);
     if (path === "/api/title") return await this.handleTitle(request);
     if (path === "/api/history") return this.json(this.getMessages());
     if (path === "/api/status") return this.json({ muted: this.isMuted, messageCount: this.getMessageCount(), onlineCount: this.clients.size, announcement: this.announcement, title: this.roomTitle });
@@ -110,6 +111,13 @@ export class ChatRoom {
     try { this.state.storage.sql.exec("DELETE FROM messages"); } catch (e) {}
     this.broadcast({ type: "system", content: "\u7BA1\u7406\u5458\u5DF2\u6E05\u7A7A\u6240\u6709\u804A\u5929\u8BB0\u5F55", timestamp: Date.now() });
     return this.json({ success: true });
+  }
+
+  async handleLogin(request) {
+    var data = {};
+    try { data = await request.json(); } catch (e) {}
+    if (this.verifyPassword(data.password)) return this.json({ success: true });
+    return this.json({ success: false, error: "\u5BC6\u7801\u9519\u8BEF" });
   }
 
   async handleMute(request) {
