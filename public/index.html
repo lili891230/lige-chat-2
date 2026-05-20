@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>李哥的公开聊天室2号房</title>
+<title>Cloudflare Worker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -101,7 +101,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <div class="conn-status" id="connStatus"><div class="bar"></div></div>
 <div class="app">
 <header class="header">
-<div class="header-left"><div class="logo">李</div><h1>李哥的公开聊天室2号房</h1></div>
+<div class="header-left"><div class="logo" id="logoChar">C</div><h1 id="headerTitle">Cloudflare Worker</h1></div>
 <div class="online-badge"><div class="online-dot"></div><span id="onlineCount">0 在线</span></div>
 </header>
 <div class="announcement" id="announcement"><div class="announcement-label">📢 公告</div><div id="announcementContent"></div><button class="announcement-close" id="announcementClose">&times;</button></div>
@@ -121,27 +121,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <script>
 (function(){
 "use strict";
-
 var audioCtx=null;
 try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
-
-function unlockAudio(){
-  if(!audioCtx)return;
-  try{audioCtx.resume();var b=audioCtx.createBuffer(1,1,22050);var s=audioCtx.createBufferSource();s.buffer=b;s.connect(audioCtx.destination);s.start(0);}catch(e){}
-}
-
-document.addEventListener('click',unlockAudio);
-document.addEventListener('touchstart',unlockAudio);
-document.addEventListener('touchend',unlockAudio);
-document.addEventListener('pointerdown',unlockAudio);
-document.addEventListener('keydown',unlockAudio);
-
-function playTone(f,d,v){
-  if(!audioCtx)return;
-  try{if(audioCtx.state!=='running')audioCtx.resume();var o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(v||0.15,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+(d||0.2));o.start();o.stop(audioCtx.currentTime+(d||0.2));}catch(e){}
-}
-
-function notifySound(){unlockAudio();playTone(880,0.15,0.15);setTimeout(function(){playTone(1320,0.18,0.12);},130);}
+function unlockAudio(){if(!audioCtx)return;try{audioCtx.resume();var b=audioCtx.createBuffer(1,1,22050);var s=audioCtx.createBufferSource();s.buffer=b;s.connect(audioCtx.destination);s.start(0);}catch(e){}}
+document.addEventListener('click',unlockAudio);document.addEventListener('touchstart',unlockAudio);document.addEventListener('touchend',unlockAudio);document.addEventListener('pointerdown',unlockAudio);document.addEventListener('keydown',unlockAudio);
+function playTone(f,d,v){if(!audioCtx)return;try{if(audioCtx.state!=='running')audioCtx.resume();var o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(v||0.15,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+(d||0.2));o.start();o.stop(audioCtx.currentTime+(d||0.2));}catch(e){}}
+function notifySound(){if(!audioCtx)return;unlockAudio();function ding(){playTone(880,0.15,0.15);setTimeout(function(){playTone(1320,0.18,0.12);},130);}if(audioCtx.state==='running'){ding();}else{audioCtx.resume().then(ding).catch(function(){});}}
 
 var COLORS=['#6c5ce7','#00cec9','#e17055','#fdcb6e','#00b894','#e84393','#0984e3','#636e72','#d63031','#a29bfe'];
 var AVATARS=['🐱','🐬','🦊','🐼','🐿️','🐰','🦋','🐳','🦌','🦢'];
@@ -157,7 +142,8 @@ nCa=document.getElementById('nameCancel'),nCo=document.getElementById('nameConfi
 mB=document.getElementById('mutedBanner'),iA=document.getElementById('inputArea'),
 eT=document.getElementById('emojiToggle'),eP=document.getElementById('emojiPicker'),eS=document.getElementById('emojiSearch'),
 eC=document.getElementById('emojiContent'),eTa=document.getElementById('emojiTabs'),cdT=document.getElementById('cdText'),
-annDiv=document.getElementById('announcement'),annCon=document.getElementById('announcementContent'),annClo=document.getElementById('announcementClose');
+annDiv=document.getElementById('announcement'),annCon=document.getElementById('announcementContent'),annClo=document.getElementById('announcementClose'),
+hTitle=document.getElementById('headerTitle'),lChar=document.getElementById('logoChar');
 
 var ws=null,myName='',pickerOpen=false,currentTab='',coolingDown=false,cdTimer=null;
 var COOLDOWN_MS=2500;
@@ -168,8 +154,9 @@ function stopCooldown(){coolingDown=false;sB.classList.remove('cooling');cdT.cla
 function showAnnouncement(content){if(content){annCon.textContent=content;annDiv.classList.add('show');}else{annDiv.classList.remove('show');}}
 annClo.addEventListener('click',function(){annDiv.classList.remove('show');});
 
-var STICKERS=[{f:'😍',t:'好爱啊'},{f:'🤣',t:'笑死'},{f:'😂',t:'哈哈哈'},{f:'😭',t:'大哭'},{f:'😱',t:'吃惊'},{f:'😎',t:'酷'},{f:'🤔',t:'思考'},{f:'🤯',t:'特么了'},{f:'😏',t:'得意'},{f:'😈',t:'坏笑'},{f:'👿',t:'恶魔'},{f:'🧐',t:'瞎想'},{f:'🥳',t:'超开心'},{f:'🥺',t:'委屈'},{f:'🙄',t:'无语'},{f:'🤦',t:'抓狂'},{f:'😑',t:'面无表情'},{f:'😴',t:'睡了'},{f:'💩',t:'屁屁'},{f:'💀',t:'骷髅'},{f:'😪',t:'困了'},{f:'🔥',t:'火火火'},{f:'❤️',t:'爱你'},{f:'👎',t:'很烦'},{f:'👍',t:'给力'},{f:'👏',t:'鼓掌'},{f:'💪',t:'加油'},{f:'🙏',t:'拜托'},{f:'💃',t:'跳舞'},{f:'👻',t:'幽灵'},{f:'🎉',t:'庆祝'},{f:'🎁',t:'礼物'},{f:'💯',t:'100分'},{f:'💥',t:'BOOM'},{f:'🙈',t:'不看'},{f:'🙉',t:'不听'},{f:'🙊',t:'不说'},{f:'🦄',t:'独角兽'},{f:'👽',t:'外星人'},{f:'🌙',t:'月亮'},{f:'☕',t:'喝茶'},{f:'🍻',t:'干杯'}];
+function updateTitle(t){document.title=t;hTitle.textContent=t;lChar.textContent=t.charAt(0).toUpperCase();}
 
+var STICKERS=[{f:'😍',t:'好爱啊'},{f:'🤣',t:'笑死'},{f:'😂',t:'哈哈哈'},{f:'😭',t:'大哭'},{f:'😱',t:'吃惊'},{f:'😎',t:'酷'},{f:'🤔',t:'思考'},{f:'🤯',t:'特么了'},{f:'😏',t:'得意'},{f:'😈',t:'坏笑'},{f:'👿',t:'恶魔'},{f:'🧐',t:'瞎想'},{f:'🥳',t:'超开心'},{f:'🥺',t:'委屈'},{f:'🙄',t:'无语'},{f:'🤦',t:'抓狂'},{f:'😑',t:'面无表情'},{f:'😴',t:'睡了'},{f:'💩',t:'屁屁'},{f:'💀',t:'骷髅'},{f:'😪',t:'困了'},{f:'🔥',t:'火火火'},{f:'❤️',t:'爱你'},{f:'👎',t:'很烦'},{f:'👍',t:'给力'},{f:'👏',t:'鼓掌'},{f:'💪',t:'加油'},{f:'🙏',t:'拜托'},{f:'💃',t:'跳舞'},{f:'👻',t:'幽灵'},{f:'🎉',t:'庆祝'},{f:'🎁',t:'礼物'},{f:'💯',t:'100分'},{f:'💥',t:'BOOM'},{f:'🙈',t:'不看'},{f:'🙉',t:'不听'},{f:'🙊',t:'不说'},{f:'🦄',t:'独角兽'},{f:'👽',t:'外星人'},{f:'🌙',t:'月亮'},{f:'☕',t:'喝茶'},{f:'🍻',t:'干杯'}];
 var EMOJI_CATS=[
 {name:'😀 表情',items:['😀','😁','😂','😃','😄','😅','😆','😇','😈','😉','😊','😋','😌','😍','😎','😏','😐','😑','😒','😓','😔','😕','😖','😗','😘','😙','😚','😛','😜','😝','😞','😟','😠','😡','😢','😣','😤','😥','😦','😧','😨','😩','😪','😫','😬','😭','😮','😯','😰','😱','😲','😳','😴','😵','😶','😷','🤒','🤕','🤢','🤣','🤤','🤥','🤨','🤩','🤪','🤫','🤬','🤭','🤮','🤯','🥰','🥱','🥲','🥷','🥳','🥸','🥺','🤠','🤡','💀','👻','👽','🤖','💩','😺','😸','😹','😻','😼','😽','🙀','😿','😾']},
 {name:'👋 手势',items:['👋','👆','👇','👈','👉','👌','👍','👎','✊','✋','🤞','🤟','🤘','🤙','🖐️','🖖','🤌','🤏','✌️','👊','🤝','🙏','✍️','💅','🤳','💪']},
@@ -182,45 +169,21 @@ var EMOJI_CATS=[
 ];
 var STICKER_CAT='👾 贴纸';
 
-function buildPicker(){
-  eTa.innerHTML='';
-  EMOJI_CATS.forEach(function(cat,i){var tab=document.createElement('div');tab.className='emoji-tab'+(i===0?' active':'');tab.setAttribute('data-cat',cat.name);tab.textContent=cat.name.split(' ')[0];eTa.appendChild(tab);});
-  var st=document.createElement('div');st.className='emoji-tab';st.setAttribute('data-cat',STICKER_CAT);st.textContent='👾';eTa.appendChild(st);
-  currentTab=EMOJI_CATS[0].name;renderTab(currentTab);
-  eTa.querySelectorAll('.emoji-tab').forEach(function(tab){tab.addEventListener('click',function(){eTa.querySelectorAll('.emoji-tab').forEach(function(t){t.classList.remove('active');});tab.classList.add('active');currentTab=tab.getAttribute('data-cat');renderTab(currentTab);eS.value='';});});
-}
-
-function renderTab(cat){
-  if(cat===STICKER_CAT){
-    var h='<div class="sticker-grid">';STICKERS.forEach(function(s){h+='<div class="sticker-item" data-sticker="'+escHtml(s.f)+' '+escHtml(s.t)+'"><span class="sticker-face">'+s.f+'</span><span class="sticker-text">'+escHtml(s.t)+'</span></div>';});h+='</div>';eC.innerHTML=h;
-    eC.querySelectorAll('.sticker-item').forEach(function(item){item.addEventListener('click',function(){mI.value+=(mI.value?' ':'')+item.getAttribute('data-sticker');mI.focus();closePicker();});});return;
-  }
-  var found=null;EMOJI_CATS.forEach(function(c){if(c.name===cat)found=c.items;});if(!found)return;
-  var h2='<div class="emoji-label">'+escHtml(cat)+'</div><div class="emoji-grid">';found.forEach(function(e){h2+='<button class="emoji-item" data-emoji="'+escHtml(e)+'">'+e+'</button>';});h2+='</div>';eC.innerHTML=h2;
-  eC.querySelectorAll('.emoji-item').forEach(function(item){item.addEventListener('click',function(){mI.value+=item.getAttribute('data-emoji');mI.focus();autoResize();});});
-}
-
+function buildPicker(){eTa.innerHTML='';EMOJI_CATS.forEach(function(cat,i){var tab=document.createElement('div');tab.className='emoji-tab'+(i===0?' active':'');tab.setAttribute('data-cat',cat.name);tab.textContent=cat.name.split(' ')[0];eTa.appendChild(tab);});var st=document.createElement('div');st.className='emoji-tab';st.setAttribute('data-cat',STICKER_CAT);st.textContent='👾';eTa.appendChild(st);currentTab=EMOJI_CATS[0].name;renderTab(currentTab);eTa.querySelectorAll('.emoji-tab').forEach(function(tab){tab.addEventListener('click',function(){eTa.querySelectorAll('.emoji-tab').forEach(function(t){t.classList.remove('active');});tab.classList.add('active');currentTab=tab.getAttribute('data-cat');renderTab(currentTab);eS.value='';});});}
+function renderTab(cat){if(cat===STICKER_CAT){var h='<div class="sticker-grid">';STICKERS.forEach(function(s){h+='<div class="sticker-item" data-sticker="'+escHtml(s.f)+' '+escHtml(s.t)+'"><span class="sticker-face">'+s.f+'</span><span class="sticker-text">'+escHtml(s.t)+'</span></div>';});h+='</div>';eC.innerHTML=h;eC.querySelectorAll('.sticker-item').forEach(function(item){item.addEventListener('click',function(){mI.value+=(mI.value?' ':'')+item.getAttribute('data-sticker');mI.focus();closePicker();});});return;}var found=null;EMOJI_CATS.forEach(function(c){if(c.name===cat)found=c.items;});if(!found)return;var h2='<div class="emoji-label">'+escHtml(cat)+'</div><div class="emoji-grid">';found.forEach(function(e){h2+='<button class="emoji-item" data-emoji="'+escHtml(e)+'">'+e+'</button>';});h2+='</div>';eC.innerHTML=h2;eC.querySelectorAll('.emoji-item').forEach(function(item){item.addEventListener('click',function(){mI.value+=item.getAttribute('data-emoji');mI.focus();autoResize();});});}
 function searchEmoji(q){q=q.toLowerCase().trim();if(!q){renderTab(currentTab);return;}var all=[];EMOJI_CATS.forEach(function(c){c.items.forEach(function(e){all.push(e);});});STICKERS.forEach(function(s){all.push(s.f+' '+s.t);});var h='<div class="emoji-label">搜索结果</div><div class="emoji-grid">';all.forEach(function(e){h+='<button class="emoji-item" data-emoji="'+escHtml(e)+'">'+e+'</button>';});h+='</div>';eC.innerHTML=h;eC.querySelectorAll('.emoji-item').forEach(function(item){item.addEventListener('click',function(){mI.value+=(mI.value?' ':'')+item.getAttribute('data-emoji');mI.focus();autoResize();});});}
-
 function openPicker(){pickerOpen=true;eP.classList.add('open');eT.classList.add('active');eS.value='';renderTab(currentTab);}
 function closePicker(){pickerOpen=false;eP.classList.remove('open');eT.classList.remove('active');}
-eT.addEventListener('click',function(){pickerOpen?closePicker():openPicker();});
-eS.addEventListener('input',function(){searchEmoji(eS.value);});
+eT.addEventListener('click',function(){pickerOpen?closePicker():openPicker();});eS.addEventListener('input',function(){searchEmoji(eS.value);});
 document.addEventListener('click',function(e){if(pickerOpen&&!eP.contains(e.target)&&e.target!==eT&&!eT.contains(e.target))closePicker();});
 function autoResize(){mI.style.height='auto';mI.style.height=Math.min(mI.scrollHeight,120)+'px';}
 
-function connect(){
-  var p=location.protocol==='https:'?'wss:':'ws:';
-  ws=new WebSocket(p+'//'+location.host+'/api/ws');sc('connecting');
-  ws.onopen=function(){sc('connected');setTimeout(function(){cS.className='conn-status';},2000);};
-  ws.onmessage=function(e){hm(JSON.parse(e.data));};
-  ws.onclose=function(){sc('disconnected');setTimeout(connect,3000);};
-  ws.onerror=function(){ws.close();};
-}
+function connect(){var p=location.protocol==='https:'?'wss:':'ws:';ws=new WebSocket(p+'//'+location.host+'/api/ws');sc('connecting');ws.onopen=function(){sc('connected');setTimeout(function(){cS.className='conn-status';},2000);};ws.onmessage=function(e){hm(JSON.parse(e.data));};ws.onclose=function(){sc('disconnected');setTimeout(connect,3000);};ws.onerror=function(){ws.close();};}
 function sc(s){cS.className='conn-status '+s;}
 
 function hm(d){
   if(d.type==='online'){oC.textContent=d.count+' 在线';return;}
+  if(d.type==='title'){updateTitle(d.title);return;}
   if(d.type==='muted'){if(d.muted){mB.classList.add('active');iA.classList.add('muted');mI.placeholder='已被禁言...';}else{mB.classList.remove('active');iA.classList.remove('muted');mI.placeholder='输入消息...';}return;}
   if(d.type==='announcement'){showAnnouncement(d.content);return;}
   if(d.type==='rate_limit'){stopCooldown();startCooldown();return;}
@@ -229,19 +192,11 @@ function hm(d){
   if(d.type==='message'){ap(d);if(d.username!==myName)notifySound();}
 }
 
-function ap(m){
-  var isMe=m.username===myName,div=document.createElement('div');
-  div.className='msg'+(isMe?' is-me':'');
-  div.innerHTML='<div class="msg-avatar" style="background:'+colorForName(m.username)+'">'+avatarForName(m.username)+'</div><div class="msg-body"><div class="msg-meta"><span class="msg-name">'+escHtml(m.username)+'</span><span class="msg-time">'+formatTime(m.timestamp)+'</span></div><div class="msg-bubble">'+escHtml(m.content)+'</div></div>';
-  mE.appendChild(div);sb();
-}
-
+function ap(m){var isMe=m.username===myName,div=document.createElement('div');div.className='msg'+(isMe?' is-me':'');div.innerHTML='<div class="msg-avatar" style="background:'+colorForName(m.username)+'">'+avatarForName(m.username)+'</div><div class="msg-body"><div class="msg-meta"><span class="msg-name">'+escHtml(m.username)+'</span><span class="msg-time">'+formatTime(m.timestamp)+'</span></div><div class="msg-bubble">'+escHtml(m.content)+'</div></div>';mE.appendChild(div);sb();}
 function sb(){requestAnimationFrame(function(){mE.scrollTop=mE.scrollHeight;});}
 
 function sm(){var c=mI.value.trim();if(!c||!ws||ws.readyState!==WebSocket.OPEN)return;if(coolingDown)return;ws.send(JSON.stringify({type:'message',content:c}));mI.value='';mI.style.height='auto';mI.focus();closePicker();startCooldown();}
-sB.addEventListener('click',sm);
-mI.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sm();}});
-mI.addEventListener('input',autoResize);
+sB.addEventListener('click',sm);mI.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sm();}});mI.addEventListener('input',autoResize);
 
 nT.addEventListener('click',function(){nM.classList.add('active');nI.value=myName;nI.focus();nI.select();});
 nCa.addEventListener('click',function(){nM.classList.remove('active');});

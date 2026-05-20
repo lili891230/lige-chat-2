@@ -73,7 +73,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <div class="ir"><span>在线人数</span><span id="sOnline">-</span></div>
       <div class="ir"><span>消息总数</span><span id="sCount">-</span></div>
       <div class="ir"><span>禁言状态</span><span id="sMuted">-</span></div>
+      <div class="ir"><span>当前标题</span><span id="sTitle">-</span></div>
       <div class="br"><button class="b bo" id="refreshBtn">刷新状态</button></div>
+    </div>
+    <div class="cd">
+      <h2>房间标题</h2><p>设置聊天室显示的名称（最多30字）</p>
+      <div class="ig"><label>标题</label><input type="text" id="titleInput" placeholder="输入标题..." maxlength="30"></div>
+      <div class="br"><button class="b by" id="titleSaveBtn">保存标题</button></div>
     </div>
     <div class="cd">
       <h2>公告栏管理</h2><p>设置聊天室顶部公告内容，留空则不显示</p>
@@ -85,6 +91,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="cd">
       <h2>禁言管理</h2><p>控制所有用户的发言权限</p>
       <div class="br"><button class="b bred" id="muteBtn">禁言所有人</button><button class="b bgn" id="unmuteBtn">解除禁言</button></div>
+    </div>
+    <div class="cd">
+      <h2>修改密码</h2><p>更改管理员登录密码（至少4位）</p>
+      <div class="ig"><label>当前密码</label><input type="password" id="oldPwd" placeholder="输入当前密码"></div>
+      <div class="ig"><label>新密码</label><input type="password" id="newPwd" placeholder="输入新密码（至少4位）"></div>
+      <div class="ig"><label>确认新密码</label><input type="password" id="newPwd2" placeholder="再次输入新密码"></div>
+      <div class="br"><button class="b by" id="changePwdBtn">修改密码</button></div>
     </div>
     <div class="cd">
       <h2>历史记录 <span class="bdg" id="historyCount">0</span></h2><p>查看所有聊天记录</p>
@@ -102,16 +115,19 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 (function(){
 "use strict";
 var adminPassword='';
-var pwdInput=document.getElementById('pwdInput'),loginBtn=document.getElementById('loginBtn'),loginCard=document.getElementById('loginCard'),adminPanel=document.getElementById('adminPanel'),sOnline=document.getElementById('sOnline'),sCount=document.getElementById('sCount'),sMuted=document.getElementById('sMuted'),refreshBtn=document.getElementById('refreshBtn'),muteBtn=document.getElementById('muteBtn'),unmuteBtn=document.getElementById('unmuteBtn'),loadBtn=document.getElementById('loadBtn'),historyArea=document.getElementById('historyArea'),historyCount=document.getElementById('historyCount'),clearBtn=document.getElementById('clearBtn'),toastEl=document.getElementById('toast'),annInput=document.getElementById('annInput'),annPreview=document.getElementById('annPreview'),annSaveBtn=document.getElementById('annSaveBtn'),annClearBtn=document.getElementById('annClearBtn');
+var pwdInput=document.getElementById('pwdInput'),loginBtn=document.getElementById('loginBtn'),loginCard=document.getElementById('loginCard'),adminPanel=document.getElementById('adminPanel'),sOnline=document.getElementById('sOnline'),sCount=document.getElementById('sCount'),sMuted=document.getElementById('sMuted'),sTitle=document.getElementById('sTitle'),refreshBtn=document.getElementById('refreshBtn'),muteBtn=document.getElementById('muteBtn'),unmuteBtn=document.getElementById('unmuteBtn'),loadBtn=document.getElementById('loadBtn'),historyArea=document.getElementById('historyArea'),historyCount=document.getElementById('historyCount'),clearBtn=document.getElementById('clearBtn'),toastEl=document.getElementById('toast'),annInput=document.getElementById('annInput'),annPreview=document.getElementById('annPreview'),annSaveBtn=document.getElementById('annSaveBtn'),annClearBtn=document.getElementById('annClearBtn'),titleInput=document.getElementById('titleInput'),titleSaveBtn=document.getElementById('titleSaveBtn');
 
 function showToast(msg,type){toastEl.textContent=msg;toastEl.className='t '+type+' show';setTimeout(function(){toastEl.classList.remove('show');},3000);}
 function escHtml(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 
-loginBtn.addEventListener('click',function(){var v=pwdInput.value.trim();if(!v){showToast('请输入密码','err');return;}adminPassword=v;loginCard.style.display='none';adminPanel.style.display='block';showToast('登录成功','ok');loadStatus();loadAnnouncement();});
+loginBtn.addEventListener('click',function(){var v=pwdInput.value.trim();if(!v){showToast('请输入密码','err');return;}adminPassword=v;loginCard.style.display='none';adminPanel.style.display='block';showToast('登录成功','ok');loadStatus();loadAnnouncement();loadTitle();});
 pwdInput.addEventListener('keydown',function(e){if(e.key==='Enter')loginBtn.click();});
 
-function loadStatus(){fetch('/api/status').then(function(r){return r.json();}).then(function(d){sOnline.textContent=d.onlineCount+' 人';sCount.textContent=d.messageCount+' 条';sMuted.innerHTML=d.muted?'<span class="sd off"></span>已禁言':'<span class="sd on"></span>正常';muteBtn.disabled=d.muted;unmuteBtn.disabled=!d.muted;}).catch(function(){showToast('加载失败','err');});}
-refreshBtn.addEventListener('click',loadStatus);
+function loadStatus(){fetch('/api/status').then(function(r){return r.json();}).then(function(d){sOnline.textContent=d.onlineCount+' 人';sCount.textContent=d.messageCount+' 条';sMuted.innerHTML=d.muted?'<span class="sd off"></span>已禁言':'<span class="sd on"></span>正常';sTitle.textContent=d.title||'-';muteBtn.disabled=d.muted;unmuteBtn.disabled=!d.muted;}).catch(function(){showToast('加载失败','err');});}
+refreshBtn.addEventListener('click',function(){loadStatus();loadTitle();});
+
+function loadTitle(){fetch('/api/title').then(function(r){return r.json();}).then(function(d){titleInput.value=d.title||'Cloudflare Worker';}).catch(function(){});}
+titleSaveBtn.addEventListener('click',function(){var t=titleInput.value.trim();if(!t){showToast('标题不能为空','err');return;}titleSaveBtn.disabled=true;titleSaveBtn.textContent='保存中...';callApi('/api/title',{title:t}).then(function(d){if(d.success){showToast('标题已更新','ok');sTitle.textContent=d.title;}else{showToast(d.error||'保存失败','err');}}).catch(function(){showToast('请求失败','err');}).finally(function(){titleSaveBtn.disabled=false;titleSaveBtn.textContent='保存标题';});});
 
 function loadAnnouncement(){fetch('/api/announcement').then(function(r){return r.json();}).then(function(d){annInput.value=d.content||'';updatePreview();}).catch(function(){});}
 function updatePreview(){var val=annInput.value.trim();if(val){annPreview.textContent=val;annPreview.style.color='var(--text)';}else{annPreview.textContent='暂无公告';annPreview.style.color='var(--text-dim)';}}
@@ -123,6 +139,8 @@ function callApi(ep,body){body.password=adminPassword;return fetch(ep,{method:'P
 
 muteBtn.addEventListener('click',function(){muteBtn.disabled=true;callApi('/api/mute',{muted:true}).then(function(d){if(d.success){showToast('已禁言所有人','ok');loadStatus();}else{showToast(d.error||'失败','err');}}).catch(function(){showToast('请求失败','err');}).finally(function(){muteBtn.disabled=false;});});
 unmuteBtn.addEventListener('click',function(){unmuteBtn.disabled=true;callApi('/api/mute',{muted:false}).then(function(d){if(d.success){showToast('已解除禁言','ok');loadStatus();}else{showToast(d.error||'失败','err');}}).catch(function(){showToast('请求失败','err');}).finally(function(){unmuteBtn.disabled=false;});});
+
+document.getElementById('changePwdBtn').addEventListener('click',function(){var old=document.getElementById('oldPwd').value.trim();var np=document.getElementById('newPwd').value.trim();var np2=document.getElementById('newPwd2').value.trim();if(!old){showToast('请输入当前密码','err');return;}if(!np||np.length<4){showToast('新密码至少4位','err');return;}if(np!==np2){showToast('两次密码不一致','err');return;}var btn=document.getElementById('changePwdBtn');btn.disabled=true;btn.textContent='修改中...';callApi('/api/change-password',{password:old,newPassword:np}).then(function(d){if(d.success){showToast('密码已修改，请重新登录','ok');adminPassword=np;document.getElementById('oldPwd').value='';document.getElementById('newPwd').value='';document.getElementById('newPwd2').value='';}else{showToast(d.error||'修改失败','err');}}).catch(function(){showToast('请求失败','err');}).finally(function(){btn.disabled=false;btn.textContent='修改密码';});});
 
 loadBtn.addEventListener('click',function(){loadBtn.disabled=true;loadBtn.textContent='加载中...';fetch('/api/history').then(function(r){return r.json();}).then(function(d){historyCount.textContent=d.length;historyArea.style.display='block';if(d.length===0){historyArea.innerHTML='<div style="text-align:center;color:var(--text-dim)">暂无记录</div>';return;}var html='';d.forEach(function(m){var time=new Date(m.timestamp).toLocaleString('zh-CN');if(m.type==='system'){html+='<div class="hi"><span class="ht">'+time+'</span> <span style="color:var(--text-dim)">'+escHtml(m.content)+'</span></div>';}else{html+='<div class="hi"><span class="ht">'+time+'</span> <span class="hu">'+escHtml(m.username)+'</span>: '+escHtml(m.content)+'</div>';}});historyArea.innerHTML=html;historyArea.scrollTop=historyArea.scrollHeight;}).catch(function(){showToast('加载失败','err');}).finally(function(){loadBtn.disabled=false;loadBtn.textContent='加载历史记录';});});
 
