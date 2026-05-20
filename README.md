@@ -22,4 +22,4 @@ https://github.com/lili891230/lige-chat-2
 禁言	管理员可禁言所有人
 清除记录	管理员一键清空
 修改密码	后台自主修改管理员密码
-管理员密码	admin 
+管理员初始密码	admin 
