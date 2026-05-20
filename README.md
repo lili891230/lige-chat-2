@@ -2,9 +2,9 @@
 
 项目	地址
 聊天页面	
-https://liche-chat.ee-1230.workers.dev
+https://liche-chat.*.workers.dev
 管理后台	
-https://liche-chat.ee-1230.workers.dev/admin
+https://liche-chat.*.workers.dev/admin
 GitHub 源码	
 https://github.com/lili891230/lige-chat-2
 
