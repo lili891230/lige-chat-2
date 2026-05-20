@@ -46,9 +46,8 @@ export class ChatRoom {
   json(data) { return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json" } }); }
 
   verifyPassword(pwd) {
-    if (this.adminPassword && pwd === this.adminPassword) return true;
-    if (pwd === this.env.ADMIN_PASSWORD) return true;
-    return false;
+    if (this.adminPassword) return pwd === this.adminPassword;
+    return pwd === this.env.ADMIN_PASSWORD;
   }
 
   getMessages() {
