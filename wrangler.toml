@@ -7,7 +7,7 @@ directory = "./public"
 binding = "ASSETS"
 
 [vars]
-ADMIN_PASSWORD = "ee312116"
+ADMIN_PASSWORD = "admin"
 
 [[durable_objects.bindings]]
 name = "CHATROOM"
