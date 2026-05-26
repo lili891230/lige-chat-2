@@ -1,0 +1,22 @@
+name = "cf-chat-2"
+main = "src/index.js"
+compatibility_date = "2024-09-01"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[vars]
+ADMIN_PASSWORD = "admin"
+
+[[durable_objects.bindings]]
+name = "CHATROOM"
+class_name = "ChatRoom"
+
+[[r2_buckets]]
+bucket_name = "chat-images"
+binding = "chat_images"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ChatRoom"]

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg-deep:#0a0a0f;--bg-surface:#12121a;--bg-elevated:#1a1a26;--bg-input:#0f0f18;--accent:#6c5ce7;--accent-soft:rgba(108,92,231,.15);--red:#e74c3c;--red-soft:rgba(231,76,60,.12);--green:#00d2a0;--green-soft:rgba(0,210,160,.12);--yellow:#f39c12;--yellow-soft:rgba(243,156,18,.12);--text:#e8e6f0;--text-muted:#6b6889;--text-dim:#3d3a52;--border:rgba(255,255,255,.06);--radius:12px;--radius-sm:8px;--shadow:0 4px 24px rgba(0,0,0,.4)}
+html,body{height:100%;font-family:'Noto Sans SC',sans-serif;background:var(--bg-deep);color:var(--text)}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 10% 90%,rgba(108,92,231,.08) 0%,transparent 60%);pointer-events:none;z-index:0}
+.c{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:24px 16px}
+.tb{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:10px}
+.tb h1{font-size:18px;font-weight:500}
+.bl{color:var(--text-muted);text-decoration:none;font-size:13px;padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);transition:all .2s ease}
+.bl:hover{border-color:var(--accent);color:var(--accent)}
+.cd{background:var(--bg-surface);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:20px;box-shadow:var(--shadow)}
+.cd h2{font-size:15px;font-weight:500;margin-bottom:6px}
+.cd p{font-size:13px;color:var(--text-muted);margin-bottom:20px}
+.ig{margin-bottom:16px}
+.ig label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:6px;font-weight:500}
+.ig input,.ig textarea{width:100%;padding:11px 16px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;font-family:'Noto Sans SC',sans-serif;outline:none;transition:border-color .2s ease,box-shadow .2s ease}
+.ig input:focus,.ig textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.ig textarea{resize:vertical;min-height:80px;max-height:200px;line-height:1.6}
+.br{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.b{padding:11px 24px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;font-family:'Noto Sans SC',sans-serif;cursor:pointer;border:none;transition:all .2s ease}
+.b:disabled{opacity:.5;cursor:not-allowed}
+.ba{background:var(--accent);color:#fff;box-shadow:0 2px 12px rgba(108,92,231,.4)}
+.ba:hover:not(:disabled){transform:translateY(-1px)}
+.bred{background:var(--red);color:#fff;box-shadow:0 2px 12px rgba(231,76,60,.3)}
+.bred:hover:not(:disabled){transform:translateY(-1px)}
+.bgn{background:var(--green);color:#fff;box-shadow:0 2px 12px rgba(0,210,160,.3)}
+.bgn:hover:not(:disabled){transform:translateY(-1px)}
+.by{background:var(--yellow);color:#fff;box-shadow:0 2px 12px rgba(243,156,18,.3)}
+.by:hover:not(:disabled){transform:translateY(-1px)}
+.bo{background:transparent;border:1px solid var(--border);color:var(--text-muted)}
+.bo:hover{border-color:var(--text-muted);color:var(--text)}
+.t{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);padding:12px 24px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;z-index:200;opacity:0;transition:all .3s ease;pointer-events:none}
+.t.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.t.ok{background:var(--green-soft);color:var(--green);border:1px solid rgba(0,210,160,.3)}
+.t.err{background:var(--red-soft);color:var(--red);border:1px solid rgba(231,76,60,.3)}
+.ir{display:flex;align-items:center;justify-content:space-between;padding:8px 0;font-size:13px}
+.ir span:first-child{color:var(--text-muted)}
+.ir span:last-child{font-family:'JetBrains Mono',monospace;color:var(--text)}
+.sd{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px}
+.sd.on{background:var(--green);box-shadow:0 0 6px var(--green)}
+.sd.off{background:var(--red);box-shadow:0 0 6px var(--red)}
+.bdg{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;margin-left:8px;background:var(--accent-soft);color:var(--accent)}
+.ha{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;max-height:400px;overflow-y:auto;font-size:12px;line-height:1.8;font-family:'JetBrains Mono',monospace;color:var(--text-muted);margin-top:16px;display:none}
+.ha::-webkit-scrollbar{width:4px}.ha::-webkit-scrollbar-track{background:transparent}.ha::-webkit-scrollbar-thumb{background:var(--text-dim);border-radius:4px}
+.hi{padding:3px 0;border-bottom:1px solid var(--border)}.hi:last-child{border-bottom:none}
+.hu{color:var(--accent);font-weight:500}
+.ht{color:var(--text-dim);font-size:11px}
+.dng{border-color:rgba(231,76,60,.2)!important}
+.dng h2{color:var(--red)}
+.preview{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;margin-top:12px;font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-word;min-height:40px;color:var(--text)}
+.preview-label{font-size:11px;color:var(--text-dim);margin-top:12px;margin-bottom:4px}
+</style>
+</head>
+<body>
+<div class="c">
+  <div class="tb"><h1>管理控制台</h1><a href="/" class="bl">返回聊天室</a></div>
+  <div id="loginCard" class="cd">
+    <h2>登录验证</h2><p>请输入管理员密码</p>
+    <div class="ig"><label>密码</label><input type="password" id="pwdInput" placeholder="输入密码..."></div>
+    <div class="br"><button class="b ba" id="loginBtn">登录</button></div>
+  </div>
+  <div id="adminPanel" style="display:none">
+    <div class="cd">
+      <h2>聊天室状态</h2><p>实时信息</p>
+      <div class="ir"><span>在线人数</span><span id="sOnline">-</span></div>
+      <div class="ir"><span>消息总数</span><span id="sCount">-</span></div>
+      <div class="ir"><span>禁言状态</span><span id="sMuted">-</span></div>
+      <div class="ir"><span>当前标题</span><span id="sTitle">-</span></div>
+      <div class="ir"><span>图片上传</span><span id="sImage">-</span></div>
+      <div class="br"><button class="b bo" id="refreshBtn">刷新状态</button></div>
+    </div>
+    <div class="cd">
+      <h2>房间标题</h2><p>设置聊天室显示的名称（最多30字）</p>
+      <div class="ig"><label>标题</label><input type="text" id="titleInput" placeholder="输入标题..." maxlength="30"></div>
+      <div class="br"><button class="b by" id="titleSaveBtn">保存标题</button></div>
+    </div>
+    <div class="cd">
+      <h2>公告栏管理</h2><p>设置聊天室顶部公告内容，留空则不显示</p>
+      <div class="ig"><label>公告内容</label><textarea id="annInput" placeholder="输入公告内容，留空则隐藏公告栏..."></textarea></div>
+      <div class="preview-label">预览效果：</div>
+      <div class="preview" id="annPreview">暂无公告</div>
+      <div class="br"><button class="b by" id="annSaveBtn">保存公告</button><button class="b bo" id="annClearBtn">清空公告</button></div>
+    </div>
+    <div class="cd">
+      <h2>图片上传</h2><p>控制用户是否可以发送图片</p>
+      <div class="ir"><span>图片上传</span><span id="sImage">-</span></div>
+      <div class="br"><button class="b bgn" id="imgOnBtn">开启图片上传</button><button class="b bred" id="imgOffBtn">关闭图片上传</button></div>
+    </div>
+    <div class="cd">
+      <h2>禁言管理</h2><p>控制所有用户的发言权限</p>
+      <div class="br"><button class="b bred" id="muteBtn">禁言所有人</button><button class="b bgn" id="unmuteBtn">解除禁言</button></div>
+    </div>
+    <div class="cd">
+      <h2>修改密码</h2><p>更改管理员登录密码（至少4位）</p>
+      <div class="ig"><label>当前密码</label><input type="password" id="oldPwd" placeholder="输入当前密码"></div>
+      <div class="ig"><label>新密码</label><input type="password" id="newPwd" placeholder="输入新密码（至少4位）"></div>
+      <div class="ig"><label>确认新密码</label><input type="password" id="newPwd2" placeholder="再次输入新密码"></div>
+      <div class="br"><button class="b by" id="changePwdBtn">修改密码</button></div>
+    </div>
+    <div class="cd">
+      <h2>历史记录 <span class="bdg" id="historyCount">0</span></h2><p>查看所有聊天记录</p>
+      <div class="br"><button class="b bo" id="loadBtn">加载历史记录</button></div>
+      <div class="ha" id="historyArea"></div>
+    </div>
+    <div class="cd dng">
+      <h2>危险操作</h2><p>此操作不可撤销，所有记录将被永久删除</p>
+      <div class="br"><button class="b bred" id="clearBtn">清除全部记录</button></div>
+    </div>
+  </div>
+</div>
+<div class="t" id="toast"></div>
+<script>
+(function(){
+"use strict";
+var adminPassword='';
+var pwdInput=document.getElementById('pwdInput'),loginBtn=document.getElementById('loginBtn'),loginCard=document.getElementById('loginCard'),adminPanel=document.getElementById('adminPanel'),sOnline=document.getElementById('sOnline'),sCount=document.getElementById('sCount'),sMuted=document.getElementById('sMuted'),sTitle=document.getElementById('sTitle'),refreshBtn=document.getElementById('refreshBtn'),muteBtn=document.getElementById('muteBtn'),unmuteBtn=document.getElementById('unmuteBtn'),loadBtn=document.getElementById('loadBtn'),historyArea=document.getElementById('historyArea'),historyCount=document.getElementById('historyCount'),clearBtn=document.getElementById('clearBtn'),toastEl=document.getElementById('toast'),annInput=document.getElementById('annInput'),annPreview=document.getElementById('annPreview'),annSaveBtn=document.getElementById('annSaveBtn'),annClearBtn=document.getElementById('annClearBtn'),titleInput=document.getElementById('titleInput'),titleSaveBtn=document.getElementById('titleSaveBtn'),sImage=document.getElementById('sImage'),imgOnBtn=document.getElementById('imgOnBtn'),imgOffBtn=document.getElementById('imgOffBtn');
+
+function showToast(msg,type){toastEl.textContent=msg;toastEl.className='t '+type+' show';setTimeout(function(){toastEl.classList.remove('show');},3000);}
+function escHtml(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+loginBtn.addEventListener('click',function(){var v=pwdInput.value.trim();if(!v){showToast('请输入密码','err');return;}loginBtn.disabled=true;loginBtn.textContent='验证中...';fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:v})}).then(function(r){return r.json();}).then(function(d){if(d.success){adminPassword=v;loginCard.style.display='none';adminPanel.style.display='block';showToast('登录成功','ok');loadStatus();loadAnnouncement();loadTitle();}else{showToast(d.error||'密码错误','err');}}).catch(function(){showToast('请求失败','err');}).finally(function(){loginBtn.disabled=false;loginBtn.textContent='登录';});});
+pwdInput.addEventListener('keydown',function(e){if(e.key==='Enter')loginBtn.click();});
+
+function loadStatus(){fetch('/api/status').then(function(r){return r.json();}).then(function(d){sOnline.textContent=d.onlineCount+' 人';sCount.textContent=d.messageCount+' 条';sMuted.innerHTML=d.muted?'<span class="sd off"></span>已禁言':'<span class="sd on"></span>正常';sTitle.textContent=d.title||'-';sImage.innerHTML=d.imageEnabled?'<span class="sd on"></span>已开启':'<span class="sd off"></span>已关闭';muteBtn.disabled=d.muted;unmuteBtn.disabled=!d.muted;imgOnBtn.disabled=d.imageEnabled;imgOffBtn.disabled=!d.imageEnabled;}).catch(function(){showToast('加载失败','err');});}
+refreshBtn.addEventListener('click',function(){loadStatus();loadTitle();});
+
+function loadTitle(){fetch('/api/title').then(function(r){return r.json();}).then(function(d){titleInput.value=d.title||'Cloudflare Worker';}).catch(function(){});}
+titleSaveBtn.addEventListener('click',function(){var t=titleInput.value.trim();if(!t){showToast('标题不能为空','err');return;}titleSaveBtn.disabled=true;titleSaveBtn.textContent='保存中...';callApi('/api/title',{title:t}).then(function(d){if(d.success){showToast('标题已更新','ok');sTitle.textContent=d.title;}else{showToast(d.error||'保存失败','err');}}).catch(function(){showToast('请求失败','err');}).finally(function(){titleSaveBtn.disabled=false;titleSaveBtn.textContent='保存标题';});});
+
+function loadAnnouncement(){fetch('/api/announcement').then(function(r){return r.json();}).then(function(d){annInput.value=d.content||'';updatePreview();}).catch(function(){});}
+function updatePreview(){var val=annInput.value.trim();if(val){annPreview.textContent=val;annPreview.style.color='var(--text)';}else{annPreview.textContent='暂无公告';annPreview.style.color='var(--text-dim)';}}
+annInput.addEventListener('input',updatePreview);
+annSaveBtn.addEventListener('click',function(){var c=annInput.value.trim();annSaveBtn.disabled=true;annSaveBtn.textContent='保存中...';callApi('/api/announcement',{content:c}).then(function(d){if(d.success){showToast('公告已更新','ok');}else{showToast(d.error||'保存失败','err');}}).catch(function(){showToast('请求失败','err');}).finally(function(){annSaveBtn.disabled=false;annSaveBtn.textContent='保存公告';});});
+annClearBtn.addEventListener('click',function(){annInput.value='';updatePreview();});
+
+function callApi(ep,body){body.password=adminPassword;return fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();});}
+
+imgOnBtn.addEventListener('click',function(){imgOnBtn.disabled=true;callApi('/api/image-toggle',{enabled:true}).then(function(d){if(d.success){showToast('图片上传已开启','ok');loadStatus();}else{showToast(d.error||'失败','err');}}).catch(function(){showToast('请求失败','err');}).finally(function(){imgOnBtn.disabled=false;});});
+imgOffBtn.addEventListener('click',function(){imgOffBtn.disabled=true;callApi('/api/image-toggle',{enabled:false}).then(function(d){if(d.success){showToast('图片上传已关闭','ok');loadStatus();}else{showToast(d.error||'失败','err');}}).catch(function(){showToast('请求失败','err');}).finally(function(){imgOffBtn.disabled=false;});});
+
+muteBtn.addEventListener('click',function(){muteBtn.disabled=true;callApi('/api/mute',{muted:true}).then(function(d){if(d.success){showToast('已禁言所有人','ok');loadStatus();}else{showToast(d.error||'失败','err');}}).catch(function(){showToast('请求失败','err');}).finally(function(){muteBtn.disabled=false;});});
+unmuteBtn.addEventListener('click',function(){unmuteBtn.disabled=true;callApi('/api/mute',{muted:false}).then(function(d){if(d.success){showToast('已解除禁言','ok');loadStatus();}else{showToast(d.error||'失败','err');}}).catch(function(){showToast('请求失败','err');}).finally(function(){unmuteBtn.disabled=false;});});
+
+document.getElementById('changePwdBtn').addEventListener('click',function(){var old=document.getElementById('oldPwd').value.trim();var np=document.getElementById('newPwd').value.trim();var np2=document.getElementById('newPwd2').value.trim();if(!old){showToast('请输入当前密码','err');return;}if(!np||np.length<4){showToast('新密码至少4位','err');return;}if(np!==np2){showToast('两次密码不一致','err');return;}var btn=document.getElementById('changePwdBtn');btn.disabled=true;btn.textContent='修改中...';callApi('/api/change-password',{password:old,newPassword:np}).then(function(d){if(d.success){showToast('密码已修改，请重新登录','ok');adminPassword=np;document.getElementById('oldPwd').value='';document.getElementById('newPwd').value='';document.getElementById('newPwd2').value='';}else{showToast(d.error||'修改失败','err');}}).catch(function(){showToast('请求失败','err');}).finally(function(){btn.disabled=false;btn.textContent='修改密码';});});
+
+loadBtn.addEventListener('click',function(){loadBtn.disabled=true;loadBtn.textContent='加载中...';fetch('/api/history').then(function(r){return r.json();}).then(function(d){historyCount.textContent=d.length;historyArea.style.display='block';if(d.length===0){historyArea.innerHTML='<div style="text-align:center;color:var(--text-dim)">暂无记录</div>';return;}var html='';d.forEach(function(m){var time=new Date(m.timestamp).toLocaleString('zh-CN');if(m.type==='system'){html+='<div class="hi"><span class="ht">'+time+'</span> <span style="color:var(--text-dim)">'+escHtml(m.content)+'</span></div>';}else{var imgTag=m.imageKey?'<img src="/api/image/'+encodeURIComponent(m.imageKey)+'" style="max-width:60px;max-height:40px;border-radius:4px;vertical-align:middle;margin-right:4px">':'';html+='<div class="hi"><span class="ht">'+time+'</span> <span class="hu">'+escHtml(m.username)+'</span>: '+imgTag+escHtml(m.content)+'</div>';}});historyArea.innerHTML=html;historyArea.scrollTop=historyArea.scrollHeight;}).catch(function(){showToast('加载失败','err');}).finally(function(){loadBtn.disabled=false;loadBtn.textContent='加载历史记录';});});
+
+clearBtn.addEventListener('click',function(){if(!confirm('确定要清除所有聊天记录吗？\n此操作不可撤销！'))return;if(!confirm('最后确认：即将永久删除所有记录'))return;clearBtn.disabled=true;clearBtn.textContent='清除中...';callApi('/api/clear',{}).then(function(d){if(d.success){showToast('记录已清空','ok');historyArea.style.display='none';historyCount.textContent='0';loadStatus();}else{showToast(d.error||'失败','err');}}).catch(function(){showToast('请求失败','err');}).finally(function(){clearBtn.disabled=false;clearBtn.textContent='清除全部记录';});});
+})();
+</script>
+</body>
+</html>
